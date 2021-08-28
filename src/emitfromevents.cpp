@@ -6,7 +6,21 @@
 #include "yaml-cpp/emittermanip.h"
 #include "yaml-cpp/null.h"
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
+#include <algorithm>
+
 namespace YAML {
+
+    bool is_number(const std::string& s)
+    {
+        return !s.empty() && std::find_if(s.begin(),
+                s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+    }
+
+
 struct Mark;
 }  // namespace YAML
 
@@ -41,7 +55,15 @@ void EmitFromEvents::OnScalar(const Mark&, const std::string& tag,
                               anchor_t anchor, const std::string& value) {
   BeginNode();
   EmitProps(tag, anchor);
+
+  if( value == "true" || value == "false" || is_number(value) ){
+      m_emitter << YAML::DoubleQuoted;
+  }
+
   m_emitter << value;
+
+  // cout << tag << "|" << anchor << "|" << value << endl;
+
 }
 
 void EmitFromEvents::OnSequenceStart(const Mark&, const std::string& tag,
